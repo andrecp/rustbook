@@ -305,3 +305,218 @@ let rect1 = Rectangle {
 // and :#? is pretty printing.
 println!("{:?} rectangle")
 ```
+
+## Modules
+
+
+If you want to make an item like a function or struct private, you put it in a module.
+
+You then use the `pub` modifier to make it public! You gotta do in the fields as well in case of structs. For enums it isn't necessary to set on every field.
+
+```rs
+mod front_of_house {
+    // private by default outside the module
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+// brings to scope hosting
+use crate::front_of_house::hosting;
+hosting::add_to_waitlist();
+
+// For data structures we use the full path
+use std::collections::HashMap;
+
+fn main() {
+    let mut map = HashMap::new();
+    map.insert(1, 2);
+}
+
+// Alias
+use std::io::Result as IoResult;
+
+// Bringing multiple things
+use std::{cmp::Ordering, io};
+use std::io::{self, Write}; // std::io and std::io::Write
+use std::collections::*;
+
+// Re-exporting, when we bring a name in the scope it is private by default
+// this way others could also use hosting
+pub use crate::front_of_house::hosting;
+
+// loads the content of the module from a file called front_of_house.rs
+mod front_of_house;
+```
+
+## Collections
+
+See `hasmap`, `vectors` and `unicode`.
+
+## Errors
+
+* `Result<T, E>` for recoverable errors
+* `panic!` for non recoverable errors
+
+`Result` has the `.unwrap` method which either returns the result of panics!
+The `.expect` is like `unwrap` but allows for a custom error message.
+
+The `?` pattern allows you to return the error if an error is found or get the result.
+
+You can also return an `Error` to propagate it.
+```rs
+fn read_username_from_file() -> Result<String, io::Error> {
+    let f = File::open("hello.txt");
+
+    let mut f = match f {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+    };
+
+    let mut s = String::new();
+
+    match f.read_to_string(&mut s) {
+        Ok(_) => Ok(s),
+        Err(e) => Err(e),
+    }
+}
+
+// Above pattern can be expressed with `?` 
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut f = File::open("hello.txt")?;
+    let mut s = String::new();
+    f.read_to_string(&mut s)?;
+    Ok(s)
+}
+
+// Even simpler
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut s = String::new();
+    File::open("hello.txt")?.read_to_string(&mut s)?;
+    Ok(s)
+}
+```
+
+## Generics, traits & lifetimes
+
+Generics can be used in structs, enums and functions, `<T>`. Can have multiple generic values as in `<T, U>`.
+
+No runtime penality for generics, expanded by the compiler for each concrete type used.
+
+Traits are like Interfaces.
+
+```rs
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+```
+
+Anything that implements `summarize` with the signature below will fulfil the `Summary` trait.
+
+```rs
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+```
+
+You can also have a default implementation such as
+
+```rs
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+
+impl Summary for NewsArticle {}
+```
+
+A function that can accept anything that implements the `Summary` trait:
+
+```rs
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+
+// Must implement both Summary and Display
+pub fn notify(item: &(impl Summary + Display)){}
+
+// Alternative syntax
+fn some_function<T, U>(t: &T, u: &U) -> i32
+    where T: Display + Clone,
+          U: Clone + Debug {
+            
+}
+
+// To be used in returns without specifying the type!
+fn returns_summarizable() -> impl Summary {
+```
+
+The main aim of lifetimes is to prevent dangling references, which cause a program to reference data other than the data it’s intended to reference.
+
+```rs
+&i32        // a reference
+&'a i32     // a reference with an explicit lifetime
+&'a mut i32 // a mutable reference with an explicit lifetime
+```
+
+Ultimately, lifetime syntax is about connecting the lifetimes of various parameters and return values of functions. Once they’re connected, Rust has enough information to allow memory-safe operations and disallow operations that would create dangling pointers or otherwise violate memory safety.
+
+## Testing
+
+Function with `#[test]`, `#[should_panic]` for tests that should panic
+
+`assert!`, `assert_eq!`, `assert_neq!`.
+
+```rs
+// Can pass a third parameter with the error message to asserts
+assert!(
+    result.contains("Carol"),
+    "Greeting did not contain name, value was `{}`",
+    result
+);
+
+// Can tailor the expect panic
+#[test]
+#[should_panic(expected = "Guess value must be less than or equal to 100")]
+fn greater_than_100() {
+    Guess::new(200);
+}
+
+// Can return a Result enum with an error.
+#[test]
+fn it_works() -> Result<(), String> {
+    if 2 + 2 == 4 {
+        Ok(())
+    } else {
+        Err(String::from("two plus two does not equal four"))
+    }
+}
+```
+
+Runs in parallel threads by default, `cargo test -- --test-threads=1` to run sequentially.
+
+`cargo test one_hundred` would only run the test whose function name contains `one_hundred`, can also use module name.
+
+Tests with `#[ignore]` will only run with `cargo test -- --ignored`
+
+Convention for unit tests is to have in the same file as the implementation in `src` but with the `tests` module
+
+Convention for integration tests is to have a `tests` directory in the root of the project.
+
+`cargo test --test integration_test` to run a single integration test by name matching.
+
+## Exercises
+
+* Given a list of integers, use a vector and return the mean (the average value), median (when sorted, the value in the middle position), and mode (the value that occurs most often; a hash map will be helpful here) of the list.
+* Convert strings to pig latin. The first consonant of each word is moved to the end of the word and “ay” is added, so “first” becomes “irst-fay.” Words that start with a vowel have “hay” added to the end instead (“apple” becomes “apple-hay”). Keep in mind the details about UTF-8 encoding!
+* Using a hash map and vectors, create a text interface to allow a user to add employee names to a department in a company. For example, “Add Sally to Engineering” or “Add Amir to Sales.” Then let the user retrieve a list of all people in a department or all people in the company by department, sorted alphabetically.

@@ -26,3 +26,15 @@ pub fn eat_at_restaurant() {
     // so public!
     front_of_house::hosting::add_to_waitlist();
 }
+
+fn serve_order() {}
+
+mod back_of_house {
+    fn fix_incorrect_order() {
+        cook_order();
+        // super allows to go up in the tree.
+        super::serve_order();
+    }
+
+    fn cook_order() {}
+}
