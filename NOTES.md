@@ -381,7 +381,7 @@ fn read_username_from_file() -> Result<String, io::Error> {
     }
 }
 
-// Above pattern can be expressed with `?` 
+// Above pattern can be expressed with `?` which returns the error
 fn read_username_from_file() -> Result<String, io::Error> {
     let mut f = File::open("hello.txt")?;
     let mut s = String::new();
@@ -394,6 +394,16 @@ fn read_username_from_file() -> Result<String, io::Error> {
     let mut s = String::new();
     File::open("hello.txt")?.read_to_string(&mut s)?;
     Ok(s)
+}
+
+// Returns a dynamic -- `dyn` Error. A type that implement the trait
+// Error.
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.filename)?;
+
+    println!("With text:\n{}", contents);
+
+    Ok(())
 }
 ```
 
