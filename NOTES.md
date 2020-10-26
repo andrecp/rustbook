@@ -9,6 +9,18 @@
 * doc
     * --open
 
+
+Re-exporting in `crate/libs.rs`, like putting functions in python's `__init__`.
+```rs
+pub use self::kinds::PrimaryColor;
+pub use self::kinds::SecondaryColor;
+pub use self::utils::mix;
+```
+
+Concept of workspace which contains libraries/bins [more](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html)
+
+`cargo install` can install rust binaries in your system.
+
 ## Basic
 
 ```rs
@@ -580,4 +592,30 @@ impl Iterator for Counter {
         }
     }
 }
+```
+
+### Documentation
+
+Three slash comments generate HTML and suports markdown.
+
+```rs
+/// Adds one to the number given.
+///
+/// # Examples
+///
+/// ```
+/// let arg = 5;
+/// let answer = my_crate::add_one(arg);
+///
+/// assert_eq!(6, answer);
+/// ```
+```
+
+`//!` for module level documentations
+
+```rs
+//! # My Crate
+//!
+//! `my_crate` is a collection of utilities to make performing certain
+//! calculations more convenient.
 ```
