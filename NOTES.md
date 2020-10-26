@@ -525,8 +525,59 @@ Convention for integration tests is to have a `tests` directory in the root of t
 
 `cargo test --test integration_test` to run a single integration test by name matching.
 
-## Exercises
+## Functional
 
-* Given a list of integers, use a vector and return the mean (the average value), median (when sorted, the value in the middle position), and mode (the value that occurs most often; a hash map will be helpful here) of the list.
-* Convert strings to pig latin. The first consonant of each word is moved to the end of the word and “ay” is added, so “first” becomes “irst-fay.” Words that start with a vowel have “hay” added to the end instead (“apple” becomes “apple-hay”). Keep in mind the details about UTF-8 encoding!
-* Using a hash map and vectors, create a text interface to allow a user to add employee names to a department in a company. For example, “Add Sally to Engineering” or “Add Amir to Sales.” Then let the user retrieve a list of all people in a department or all people in the company by department, sorted alphabetically.
+The Fn traits are provided by the standard library. All closures implement at least one of the traits: Fn, FnMut, or FnOnce. We’ll discuss the difference between these traits in the “Capturing the Environment with Closures” section; in this example, we can use the Fn trait.
+
+```rs
+
+let expensive_closure = |num| {
+    println!("calculating slowly...");
+    thread::sleep(Duration::from_secs(2));
+    num
+};  
+```
+
+### Iterators
+
+```rs
+let v1 = vec![1, 2, 3];
+
+let v1_iter = v1.iter();
+// Sum takes ownership of the iterator and consumes it.
+let total: i32 = v1_iter.sum();
+
+let v1_iter = v1.iter();
+for val in v1_iter {
+    println!("Got: {}", val);
+}
+
+// Map + Closure
+let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+
+// Filter
+#[derive(PartialEq, Debug)]
+struct Shoe {
+    size: u32,
+    style: String,
+}
+
+fn shoes_in_my_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
+    // into_iter takes ownership.
+    shoes.into_iter().filter(|s| s.size == shoe_size).collect()
+}
+
+// Implementing our own
+impl Iterator for Counter {
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.count < 5 {
+            self.count += 1;
+            Some(self.count)
+        } else {
+            None
+        }
+    }
+}
+```
