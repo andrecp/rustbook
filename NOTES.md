@@ -594,7 +594,7 @@ impl Iterator for Counter {
 }
 ```
 
-### Documentation
+## Documentation
 
 Three slash comments generate HTML and suports markdown.
 
@@ -619,3 +619,10 @@ Three slash comments generate HTML and suports markdown.
 //! `my_crate` is a collection of utilities to make performing certain
 //! calculations more convenient.
 ```
+
+## Smart pointers
+
+* `Box<T>` points to data on the heap
+* Implement `Deref` trait to have the `&` working
+* Implement `Drop` trait to free resources once outside scope, you can also call `drop(obj)` to manually drop something instead of RAII
+* `Rc<T>` is a reference counting smart pointer, multiple owners of a data. Like, many edges to a particular node in a graph. `Rc::clone` increases the number of references (not a deep copy). `Deref` is called when reference count reaches out.
