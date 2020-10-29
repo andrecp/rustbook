@@ -625,4 +625,43 @@ Three slash comments generate HTML and suports markdown.
 * `Box<T>` points to data on the heap
 * Implement `Deref` trait to have the `&` working
 * Implement `Drop` trait to free resources once outside scope, you can also call `drop(obj)` to manually drop something instead of RAII
-* `Rc<T>` is a reference counting smart pointer, multiple owners of a data. Like, many edges to a particular node in a graph. `Rc::clone` increases the number of references (not a deep copy). `Deref` is called when reference count reaches out.
+* `Rc<T>` is a reference counting smart pointer, multiple owners of a data. Like, many edges to a particular node in a graph. `Rc::clone` increases the number of references (not a deep copy). `Deref` is called when reference count reaches out. `Rc::downgrade` creates a weak reference.
+* `RefCell<T>` doesn't check for the borrow checking rules, i.e: you can have multiple references owning the data at the same time/scope. Possible to panic at runtime.
+* `Rc<RefCell<i32>>` would allow for multiple owners of a multiple data.
+* Cyclical references can cause memory leak.
+
+```rs
+
+// A tree.
+use std::cell::RefCell;
+use std::rc::Rc;
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    // A node has a mutable Vector if Nodes owned by multiple people
+    children: RefCell<Vec<Rc<Node>>>,
+    // Thinking about the relationships another way, a parent node should own its children: if a parent node is dropped, its child nodes should be dropped as well.
+    // However, a child should not own its parent: if we drop a child node, the parent should still exist. This is a case for weak references!
+    parent: RefCell<Weak<Node>>,
+}
+
+// We want a Node to own its children,
+// and we want to share that ownership with variables so we can access each Node in the tree directly.
+// To do this, we define the Vec<T> items to be values of type Rc<Node>.
+// We also want to modify which nodes are children of another node,
+// so we have a RefCell<T> in children around the Vec<Rc<Node>>.
+
+
+fn main() {
+    let leaf = Rc::new(Node {
+        value: 3,
+        children: RefCell::new(vec![]),
+    });
+
+    let branch = Rc::new(Node {
+        value: 5,
+        children: RefCell::new(vec![Rc::clone(&leaf)]),
+    });
+}
+```
