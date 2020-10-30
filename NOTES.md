@@ -626,6 +626,7 @@ Three slash comments generate HTML and suports markdown.
 * Implement `Deref` trait to have the `&` working
 * Implement `Drop` trait to free resources once outside scope, you can also call `drop(obj)` to manually drop something instead of RAII
 * `Rc<T>` is a reference counting smart pointer, multiple owners of a data. Like, many edges to a particular node in a graph. `Rc::clone` increases the number of references (not a deep copy). `Deref` is called when reference count reaches out. `Rc::downgrade` creates a weak reference.
+* `Arc<T>` is the same as `Rc<T>` but atomic and safe between threads.
 * `RefCell<T>` doesn't check for the borrow checking rules, i.e: you can have multiple references owning the data at the same time/scope. Possible to panic at runtime.
 * `Rc<RefCell<i32>>` would allow for multiple owners of a multiple data.
 * Cyclical references can cause memory leak.
