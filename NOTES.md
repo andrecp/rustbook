@@ -316,6 +316,37 @@ let rect1 = Rectangle {
 // :? prints the Debug formatting, by default {} prints the Display formatting.
 // and :#? is pretty printing.
 println!("{:?} rectangle")
+
+
+// A vector of objects that implement the Draw trait.
+// 
+pub trait Draw {
+    fn draw(&self);
+}
+
+pub struct Screen {
+    pub components: Vec<Box<dyn Draw>>,
+}
+
+impl Screen {
+    pub fn run(&self) {
+        for component in self.components.iter() {
+            component.draw();
+        }
+    }
+}
+
+pub struct Button {
+    pub width: u32,
+    pub height: u32,
+    pub label: String,
+}
+
+impl Draw for Button {
+    fn draw(&self) {
+        // code to actually draw a button
+    }
+}
 ```
 
 ## Modules
@@ -630,6 +661,7 @@ Three slash comments generate HTML and suports markdown.
 * `RefCell<T>` doesn't check for the borrow checking rules, i.e: you can have multiple references owning the data at the same time/scope. Possible to panic at runtime.
 * `Rc<RefCell<i32>>` would allow for multiple owners of a multiple data.
 * Cyclical references can cause memory leak.
+
 
 ```rs
 
