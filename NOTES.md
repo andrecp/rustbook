@@ -153,6 +153,17 @@ let result = loop {
 for number in (1..4).rev() {
     println!("{}!", number);
 }
+
+// Pattern for iterating until no more value in a stack with while let.
+let mut stack = Vec::new();
+
+stack.push(1);
+stack.push(2);
+stack.push(3);
+
+while let Some(top) = stack.pop() {
+    println!("{}", top);
+}
 ```
 ### Immutable vs mutable variables
 
